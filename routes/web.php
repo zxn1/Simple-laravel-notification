@@ -139,10 +139,33 @@ Route::middleware('auth')->group(function(){
         $tempArr = [];
         foreach(Auth::user()->notifications as $noti)
         {
+            $noti->linkMarkAsRead = 'localhost:8000/checked?id=' . $noti->id;
             $tempArr[] = $noti;
         }
         return $tempArr;
     })->name('noty');
+
+
+    //mark notification as Read
+    Route::get('/checked', function(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required|string|max:255',
+        ]);
+
+        $notification = Auth::user()->notifications()->findOrFail($validatedData['id']);
+        $notification->markAsRead();
+        return '<center><h1>Marked as read!</h1></center>
+        <script>
+        let test = setInterval(()=>{
+            console.log(`redirecting`);
+            window.location.href = `' . route('noty') . '`;
+            clearInterval(test);
+        }, 1000);
+        </script>
+        ';
+    });
+    
 
     //create notification
     Route::get('/sending', function(Request $request)
