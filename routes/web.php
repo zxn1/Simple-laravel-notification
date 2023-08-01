@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Notifications\TaskCompleted;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\testEmail;
+use App\Jobs\MemprosesData;
 
 /*
 |--------------------------------------------------------------------------
@@ -178,6 +179,24 @@ Route::middleware('auth')->group(function(){
         ]);
 
         Mail::to($validatedData['email'])->send(new testEmail());
+    });
+
+    //create queue table
+    //php artisan queue:table
+    //migrate
+    //dispatch the job
+    //extra info:
+    //you typically run the queue worker as a background process using tools like Supervisor.
+    //http://supervisord.org/
+    //or php artisan queue:work
+    //php artisan queue:work --queue=redis
+    Route::get('/letakJobLamQue', function(Request $request)
+    {
+        $validatedData = $request->validate([
+            'email' => 'required|string|email|max:255'
+        ]);
+        MemprosesData::dispatch($validatedData['email']);
+        return 'dah letak lam queue';
     });
 
 });
